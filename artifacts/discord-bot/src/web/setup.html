@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEB Security — First-Run Setup</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1e2124;color:#dcddde;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#2f3136;border-radius:10px;padding:40px 36px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;justify-content:center}
+.logo-icon{width:44px;height:44px;background:#7289da;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.logo-text h1{font-size:18px;font-weight:700;color:#fff}
+.logo-text p{font-size:12px;color:#72767d}
+.banner{background:#2c4a2c;border:1px solid #43b581;border-radius:6px;padding:12px 14px;margin-bottom:24px;font-size:13px;color:#43b581;line-height:1.5}
+.banner strong{display:block;margin-bottom:4px;font-size:14px}
+label{display:block;font-size:12px;font-weight:600;color:#b9bbbe;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input[type="text"],input[type="password"]{width:100%;background:#40444b;border:1px solid #202225;border-radius:4px;color:#dcddde;padding:10px 12px;font-size:14px;outline:none;transition:border-color .15s}
+input:focus{border-color:#7289da}
+.field{margin-bottom:18px}
+.hint{font-size:12px;color:#72767d;margin-top:5px;line-height:1.4}
+button{width:100%;background:#43b581;color:#fff;border:none;border-radius:4px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px}
+button:hover{background:#3ca374}
+button:disabled{background:#2d7a54;cursor:not-allowed}
+.error{color:#f04747;font-size:13px;margin-top:12px;text-align:center;display:none}
+.success{color:#43b581;font-size:13px;margin-top:12px;text-align:center;display:none}
+.divider{border-top:1px solid #40444b;margin:20px 0}
+.footer{font-size:12px;color:#72767d;text-align:center}
+.footer a{color:#7289da;text-decoration:none}
+.pw-strength{height:3px;border-radius:2px;margin-top:6px;transition:all .2s;background:#40444b}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">
+      <h1>SEB Security</h1>
+      <p>First-Run Setup</p>
+    </div>
+  </div>
+
+  <div class="banner">
+    <strong>No accounts found</strong>
+    Create your first admin account to access the control panel. This page is only available when no accounts exist.
+  </div>
+
+  <div class="field">
+    <label>Username</label>
+    <input id="username" type="text" placeholder="admin" autocomplete="username">
+  </div>
+  <div class="field">
+    <label>Discord User ID</label>
+    <input id="discordId" type="text" placeholder="123456789012345678">
+    <div class="hint">Right-click your name in Discord → Copy User ID (enable Developer Mode in Settings → Advanced)</div>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input id="password" type="password" placeholder="Min. 6 characters" oninput="checkStrength(this.value)">
+    <div class="pw-strength" id="pwStrength"></div>
+  </div>
+  <div class="field">
+    <label>Confirm Password</label>
+    <input id="confirm" type="password" placeholder="Repeat password">
+  </div>
+
+  <button id="setupBtn" onclick="doSetup()">Create Admin Account</button>
+  <div id="error" class="error"></div>
+
+  <div id="qrBox" style="display:none;background:#202225;border-radius:6px;padding:14px;margin-top:16px">
+    <div style="color:#43b581;font-weight:600;font-size:13px;margin-bottom:8px">✅ Account created successfully!</div>
+    <div style="font-size:12px;color:#b9bbbe;margin-bottom:6px">Save your QR login token — you'll need it to reset your password if you forget it:</div>
+    <div id="qrTokenDisplay" style="font-family:monospace;font-size:13px;background:#40444b;padding:8px 10px;border-radius:4px;color:#fff;word-break:break-all"></div>
+    <button onclick="window.location.replace('/login')" style="margin-top:12px;background:#43b581">Go to Login →</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="footer"><a href="/login">← Back to Login</a></div>
+</div>
+
+<script>
+document.getElementById('username').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('discordId').focus(); });
+document.getElementById('discordId').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('confirm').focus(); });
+document.getElementById('confirm').addEventListener('keydown', e => { if (e.key === 'Enter') doSetup(); });
+
+function checkStrength(pw) {
+  const bar = document.getElementById('pwStrength');
+  if (!pw) { bar.style.background = '#40444b'; bar.style.width = '0'; return; }
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^a-zA-Z0-9]/.test(pw)) score++;
+  const colors = ['#f04747','#faa61a','#faa61a','#43b581','#43b581'];
+  bar.style.background = colors[score - 1] || '#40444b';
+  bar.style.width = (score * 20) + '%';
+}
+
+async function doSetup() {
+  const btn = document.getElementById('setupBtn');
+  const err = document.getElementById('error');
+  const username = document.getElementById('username').value.trim().toLowerCase().replace(/\s+/g, '_');
+  const discordId = document.getElementById('discordId').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm').value;
+
+  err.style.display = 'none';
+
+  if (!username) { err.textContent = 'Enter a username.'; err.style.display = 'block'; return; }
+  if (!discordId || !/^\d{17,20}$/.test(discordId)) { err.textContent = 'Enter a valid Discord User ID (17–20 digits).'; err.style.display = 'block'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
+  if (password !== confirm) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  try {
+    const res = await fetch('/api/setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, discordId, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Setup failed.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Create Admin Account'; return; }
+    btn.style.display = 'none';
+    if (data.qrToken) {
+      document.getElementById('qrTokenDisplay').textContent = data.qrToken;
+      document.getElementById('qrBox').style.display = 'block';
+    } else {
+      window.location.replace('/login');
+    }
+  } catch {
+    err.textContent = 'Could not connect. Try again.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Create Admin Account';
+  }
+}
+</script>
+</body>
+</html>

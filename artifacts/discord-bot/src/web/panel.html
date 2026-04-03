@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEB Security Panel</title>
+<style>
+:root{--accent:#7289da;--accent2:#677bc4;--bg:#1e2124;--sidebar:#2f3136;--card:#36393f;--border:#202225;--text:#dcddde;--muted:#72767d;--green:#43b581;--red:#f04747;--yellow:#faa61a;--white:#fff}
+[data-theme="red"]{--accent:#f04747;--accent2:#c23535}
+[data-theme="blue"]{--accent:#00aff4;--accent2:#0090cc}
+[data-theme="green"]{--accent:#43b581;--accent2:#2d7a5a}
+[data-theme="light"]{--bg:#f2f3f5;--sidebar:#e3e5e8;--card:#fff;--border:#d4d7dc;--text:#2e3338;--muted:#72767d}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--sidebar);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{font-size:20px}
+.topbar-title{font-weight:700;font-size:16px;color:var(--white)}
+.topbar-subtitle{font-size:12px;color:var(--muted);margin-left:8px}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.bot-status{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.online{background:var(--green)}
+.dot.offline{background:var(--red)}
+.user-menu{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .15s}
+.user-menu:hover{background:rgba(255,255,255,.07)}
+.user-avatar{width:28px;height:28px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--white)}
+.user-name{font-size:14px;font-weight:600}
+.logout-btn{background:none;border:1px solid var(--red);color:var(--red);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;transition:all .15s}
+.logout-btn:hover{background:var(--red);color:var(--white)}
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{background:var(--sidebar);width:200px;flex-shrink:0;padding:16px 0;overflow-y:auto;border-right:1px solid var(--border)}
+.nav-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 20px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 18px;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s;margin-bottom:1px;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.nav-item.active{background:rgba(114,137,218,.15);color:var(--accent)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.content{flex:1;padding:28px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block}
+h2{font-size:20px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.card{background:var(--card);border-radius:8px;padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border-radius:8px;padding:16px 20px;border:1px solid var(--border)}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.stat-val{font-size:24px;font-weight:700;color:var(--white)}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600}
+.status.pending{background:rgba(250,166,26,.15);color:var(--yellow)}
+.status.approved{background:rgba(67,181,129,.15);color:var(--green)}
+.status.denied{background:rgba(240,71,71,.15);color:var(--red)}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600}
+.pill.server{background:rgba(240,71,71,.15);color:#f04747}
+.pill.game{background:rgba(0,175,244,.15);color:#00aff4}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input[type="text"],input[type="password"],input[type="number"],select,textarea{width:100%;background:#40444b;border:1px solid var(--border);border-radius:4px;color:var(--text);padding:9px 12px;font-size:14px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:#40444b}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:var(--white)}
+.btn-primary:hover{background:var(--accent2)}
+.btn-danger{background:var(--red);color:var(--white)}
+.btn-danger:hover{background:#c23535}
+.btn-warn{background:var(--yellow);color:#000}
+.btn-warn:hover{background:#d48c10}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
+.swatch.active{border-color:var(--white)}
+.swatch.default{background:#7289da}
+.swatch.red{background:#f04747}
+.swatch.blue{background:#00aff4}
+.swatch.green{background:#43b581}
+.swatch.light{background:#f2f3f5;border:3px solid #b9bbbe}
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.cmd-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.cmd-name{font-size:14px;font-weight:700;color:var(--accent);font-family:monospace}
+.cmd-desc{font-size:13px;color:var(--muted);margin-top:4px}
+.cmd-cat{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:6px;letter-spacing:.5px}
+.alert{padding:12px 16px;border-radius:6px;font-size:14px;margin-bottom:16px}
+.alert-hidden{display:none}
+.alert-success{background:rgba(67,181,129,.15);color:var(--green);border:1px solid rgba(67,181,129,.3)}
+.alert-error{background:rgba(240,71,71,.15);color:var(--red);border:1px solid rgba(240,71,71,.3)}
+.alert-info{background:rgba(114,137,218,.15);color:var(--accent);border:1px solid rgba(114,137,218,.3)}
+.log-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.log-item:last-child{border-bottom:none}
+.log-title{font-weight:600;margin-bottom:2px}
+.log-desc{color:var(--muted)}
+.log-time{font-size:11px;color:var(--muted);margin-top:2px}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.mod-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.action-tab{padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.action-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(114,137,218,.1)}
+.action-tab.disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.account-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.account-row:last-child{border-bottom:none}
+.account-info{font-size:14px}
+.account-name{font-weight:700;color:var(--text)}
+.account-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.account-pass{font-family:monospace;background:var(--border);padding:2px 6px;border-radius:3px;font-size:12px;color:var(--text)}
+.howbot-section{display:flex;flex-direction:column;gap:12px}
+.howbot-item{background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.howbot-title{background:rgba(114,137,218,.12);color:var(--accent);font-size:13px;font-weight:700;padding:10px 14px;border-bottom:1px solid var(--border)}
+.howbot-body{font-size:13px;color:var(--muted);padding:12px 14px;line-height:1.7}
+.howbot-body strong{color:var(--text)}
+.howbot-body code{background:var(--border);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent)}
+.howbot-body em{color:var(--yellow)}
+@media(max-width:640px){.sidebar{width:56px}.nav-item span:not(.nav-icon){display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🛡️</div>
+    <div class="topbar-title">SEB Security</div>
+    <div class="topbar-subtitle">Control Panel</div>
+  </div>
+  <div class="topbar-right">
+    <div class="bot-status"><div class="dot offline" id="botDot"></div><span id="botStatusText" style="font-size:13px;color:var(--muted)">Checking...</span></div>
+    <div class="user-menu">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-name" id="userName">Loading...</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span><span>Overview</span></div>
+    <div class="nav-item" onclick="showPage('commands')" id="nav-commands"><span class="nav-icon">⚡</span><span>Commands</span></div>
+    <div class="nav-item" onclick="showPage('moderation')" id="nav-moderation" style="display:none"><span class="nav-icon">🔨</span><span>Moderation</span></div>
+    <div class="nav-item" onclick="showPage('logs')" id="nav-logs" style="display:none"><span class="nav-icon">📋</span><span>Logs</span></div>
+    <div class="nav-item" onclick="showPage('appeals')" id="nav-appeals" style="display:none"><span class="nav-icon">📩</span><span>Appeals</span></div>
+    <div class="nav-label">Account</div>
+    <div class="nav-item" onclick="showPage('settings')" id="nav-settings"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+    <div class="nav-item" onclick="showPage('shift')" id="nav-shift" style="display:none"><span class="nav-icon">🔄</span><span>Shift User</span></div>
+    <div class="nav-item" onclick="showPage('accounts')" id="nav-accounts" style="display:none"><span class="nav-icon">👥</span><span>Accounts</span></div>
+    <div class="nav-label">Info</div>
+    <div class="nav-item" onclick="showPage('howbot')" id="nav-howbot"><span class="nav-icon">📖</span><span>How Bot Works</span></div>
+  </nav>
+
+  <main class="content">
+
+    <div class="page active" id="page-overview">
+      <h2>📊 Overview</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-label">Appeals</div><div class="stat-val" id="statAppeals">—</div><div class="stat-sub">Total</div></div>
+        <div class="stat"><div class="stat-label">Pending</div><div class="stat-val" id="statPending">—</div><div class="stat-sub">Awaiting review</div></div>
+        <div class="stat"><div class="stat-label">Logs</div><div class="stat-val" id="statLogs">—</div><div class="stat-sub">Recorded</div></div>
+        <div class="stat"><div class="stat-label">Bot</div><div class="stat-val bot-status"><div class="dot online" id="statDot"></div></div><div class="stat-sub" id="statBotText">Online</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          Welcome to the <strong style="color:var(--text)">SEB Security</strong> control panel.<br>
+          Use the sidebar to navigate. Your access level controls which sections are visible.
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-commands">
+      <h2>⚡ Commands</h2>
+      <div id="commandsGrid" class="cmd-grid"></div>
+    </div>
+
+    <div class="page" id="page-moderation">
+      <h2>🔨 Moderation</h2>
+      <div id="modAlert" class="alert alert-hidden"></div>
+      <div class="mod-actions">
+        <div class="action-tab active" onclick="setModAction('timeout')" id="modtab-timeout">⏱️ Timeout</div>
+        <div class="action-tab disabled" onclick="setModAction('kick')" id="modtab-kick">👢 Kick</div>
+        <div class="action-tab disabled" onclick="setModAction('ban')" id="modtab-ban">🔨 Ban</div>
+        <div class="action-tab active" onclick="setModAction('warn')" id="modtab-warn">⚠️ Warn</div>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label>Discord User ID</label>
+          <input type="text" id="modUserId" placeholder="e.g. 123456789012345678">
+        </div>
+        <div class="form-group" id="modDurationGroup" style="display:none">
+          <label>Duration (minutes)</label>
+          <input type="number" id="modDuration" placeholder="e.g. 60" min="1" max="40320">
+        </div>
+        <div class="form-group">
+          <label>Reason <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></label>
+          <input type="text" id="modReason" placeholder="Reason for this action">
+        </div>
+        <button class="btn btn-danger" id="modSubmitBtn" onclick="submitModAction()">Execute Action</button>
+      </div>
+      <div class="card">
+        <h3>Access Level Guide</h3>
+        <div style="font-size:13px;color:var(--muted);line-height:2">
+          <div>🟡 <strong style="color:var(--text)">Moderator</strong> — Timeout, Warn</div>
+          <div>🟠 <strong style="color:var(--text)">Admin</strong> — Timeout, Warn, Kick, Ban (appeal sent on ban)</div>
+          <div>🔴 <strong style="color:var(--text)">Owner / Whitelist</strong> — All actions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-logs">
+      <h2>📋 Moderation Logs</h2>
+      <div class="card">
+        <div id="logsContainer"><div class="empty"><div class="empty-icon">📋</div>No logs yet</div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-appeals">
+      <h2>📩 Ban Appeals</h2>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="loadAppeals('all')" id="filter-all">All</button>
+        <button class="btn" style="background:var(--card);border:1px solid var(--border)" onclick="loadAppeals('pending')">Pending</button>
+        <button class="btn" style="background:var(--card);border:1px solid var(--border)" onclick="loadAppeals('approved')">Approved</button>
+        <button class="btn" style="background:var(--card);border:1px solid var(--border)" onclick="loadAppeals('denied')">Denied</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>User</th><th>Type</th><th>Status</th><th>Submitted</th><th>Reviewed By</th></tr></thead>
+          <tbody id="appealsBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-settings">
+      <h2>⚙️ Settings</h2>
+      <div id="settingsAlert" class="alert alert-hidden"></div>
+
+      <div class="card">
+        <h3>Panel Theme</h3>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-swatches">
+            <div class="swatch default active" onclick="setSwatch('default',this)" title="Default"></div>
+            <div class="swatch red" onclick="setSwatch('red',this)" title="Red"></div>
+            <div class="swatch blue" onclick="setSwatch('blue',this)" title="Blue"></div>
+            <div class="swatch green" onclick="setSwatch('green',this)" title="Green"></div>
+            <div class="swatch light" onclick="setSwatch('light',this)" title="Light"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Language</h3>
+        <div class="form-group">
+          <label>Display Language</label>
+          <select id="languageSelect" onchange="saveLanguage()">
+            <option value="en">🇬🇧 English</option>
+            <option value="es">🇪🇸 Spanish</option>
+            <option value="fr">🇫🇷 French</option>
+            <option value="de">🇩🇪 German</option>
+            <option value="pt">🇧🇷 Portuguese</option>
+            <option value="it">🇮🇹 Italian</option>
+            <option value="nl">🇳🇱 Dutch</option>
+            <option value="pl">🇵🇱 Polish</option>
+            <option value="ru">🇷🇺 Russian</option>
+            <option value="tr">🇹🇷 Turkish</option>
+            <option value="ar">🇸🇦 Arabic</option>
+            <option value="zh">🇨🇳 Chinese</option>
+            <option value="ja">🇯🇵 Japanese</option>
+            <option value="ko">🇰🇷 Korean</option>
+            <option value="hi">🇮🇳 Hindi</option>
+            <option value="sv">🇸🇪 Swedish</option>
+            <option value="no">🇳🇴 Norwegian</option>
+            <option value="da">🇩🇰 Danish</option>
+            <option value="fi">🇫🇮 Finnish</option>
+            <option value="ro">🇷🇴 Romanian</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Change Password</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">After submitting, the bot will DM you on Discord to confirm the change.</p>
+        <div id="pwAlert" class="alert alert-hidden"></div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="newPassword" placeholder="Minimum 6 characters">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPassword" placeholder="Repeat new password">
+        </div>
+        <button class="btn btn-primary" onclick="requestPasswordChange()">Request Change via DM</button>
+      </div>
+
+      <div class="card">
+        <h3>Account Info</h3>
+        <div style="font-size:14px;line-height:2.2">
+          <div><span style="color:var(--muted)">Username:</span> <strong id="settingsUsername"></strong></div>
+          <div><span style="color:var(--muted)">Access Level:</span> <strong id="settingsLevel"></strong></div>
+          <div><span style="color:var(--muted)">Discord ID:</span> <code id="settingsDiscord" style="background:var(--border);padding:2px 6px;border-radius:4px;font-size:12px"></code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-shift">
+      <h2>🔄 Shift User</h2>
+      <div class="card">
+        <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6">
+          Shift your web panel account to a different Discord user.<br>
+          • If they already have an account, this account gets reassigned to them.<br>
+          • If they don't, they'll receive a DM to confirm and get a new account created automatically.<br>
+          <strong style="color:var(--yellow)">⚠️ The target user is always DM'd before any transfer. Server owners will be notified.</strong>
+        </p>
+        <div id="shiftAlert" class="alert alert-hidden"></div>
+        <div class="form-group">
+          <label>Target Discord User ID</label>
+          <input type="text" id="shiftDiscordId" placeholder="e.g. 123456789012345678">
+        </div>
+        <button class="btn btn-danger" onclick="doShift()">Shift Account</button>
+      </div>
+    </div>
+
+    <div class="page" id="page-accounts">
+      <h2>👥 Accounts</h2>
+      <div id="accountsAlert" class="alert alert-hidden"></div>
+      <div class="card">
+        <div id="accountsList"><div class="empty"><div class="empty-icon">👥</div>Loading accounts...</div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-howbot">
+      <h2>📖 How the Bot Works</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">A complete reference for everything the bot does — automatic protections running in the background, manual commands, the appeal system, and the web panel.</p>
+
+      <div class="card">
+        <h3>🤖 Automatic Protections (Always Running)</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">These run 24/7 with no staff involvement. The bot watches every message and server event.</p>
+
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">⚡ Anti-Spam</div>
+            <div class="howbot-body">If a user sends <strong>5 or more messages within 5 seconds</strong>, the bot immediately:<br>
+            1. Deletes the triggering message<br>
+            2. Bulk-deletes their recent spam messages (up to 20 fetched, recent filtered)<br>
+            3. Times the user out for <strong>5 minutes</strong><br>
+            4. Logs the event to the server log channel<br><br>
+            Whitelisted owners are fully exempt. The bot resets the spam counter after triggering.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">📢 Mass Mention Detection</div>
+            <div class="howbot-body">If a single message contains <strong>3 or more user/role mentions</strong>:<br>
+            • <strong>First offence</strong> — message deleted, warning logged<br>
+            • <strong>Second offence</strong> — message deleted + user kicked from server<br>
+            Strike counter resets after a kick. Whitelisted owners are exempt.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">🔗 Link Filter</div>
+            <div class="howbot-body">All links are blocked unless the sender has one of the four exempt roles. Specific rules:<br>
+            • <strong>Discord invite links</strong> — always deleted for everyone, including exempt roles<br>
+            • <strong>GIF hosting sites</strong> — always allowed: Tenor, Giphy, Gfycat, Imgur, Klipy<br>
+            • <strong>Images and file attachments sent without any text</strong> — always allowed (not treated as a link)<br>
+            • <strong>Masked links</strong> — even if hidden behind text like <code>[click here](url)</code>, GIF hosts are still blocked if masked<br>
+            • All other URLs — deleted and logged<br><br>
+            The four exempt role IDs bypass all link filtering (Discord invite links still blocked).</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">🤬 Profanity Filter</div>
+            <div class="howbot-body">Monitors all message text for serious slurs and explicit words. Mild words like <em>wtf, shit, ass, damn</em> are intentionally allowed.<br><br>
+            When a blocked word is detected:<br>
+            1. Message is deleted<br>
+            2. User gets a DM explaining the deletion and how many strikes remain<br>
+            3. After <strong>4 strikes</strong>, the user receives a formal warning and their counter resets<br><br>
+            The filter handles character substitutions (4 → a, @ → a, 1 → i, $ → s, etc.) and repeated letters to catch bypass attempts. Only applies to message text — images and GIFs are never flagged.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">🤖 Unauthorized Bot Detection</div>
+            <div class="howbot-body">When any bot joins the server, the bot checks if it is on the whitelist (set via <code>/whitelist</code>).<br>
+            • If <strong>not whitelisted</strong> → bot is kicked, and the Discord user who added it gets a DM notification<br>
+            • If <strong>whitelisted</strong> → bot stays, event is logged as allowed<br><br>
+            This prevents server raids via malicious bots being added.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">🛡️ Dangerous Role Creation</div>
+            <div class="howbot-body">When a new role is created with <strong>Administrator permission</strong>:<br>
+            • Audit logs are checked to find who created it<br>
+            • If the creator is <strong>not</strong> the server owner or a whitelisted owner → role is immediately deleted and logged<br>
+            • If the creator <strong>is</strong> the owner or whitelisted → allowed, but still logged as a warning<br><br>
+            This prevents privilege escalation attacks.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">💣 Mass Channel Deletion (Anti-Nuke)</div>
+            <div class="howbot-body">Tracks channel deletions per user within a <strong>30-second window</strong>.<br>
+            • If someone deletes <strong>4 or more channels in 30 seconds</strong> → all their roles are stripped immediately<br>
+            • This neutralizes the threat instantly without banning (in case it was accidental)<br>
+            • Stripped roles are saved so an admin can restore them manually<br><br>
+            <strong>Special case — Log Channel:</strong> If the dedicated server log channel is deleted:<br>
+            1. The deleter is <strong>permanently banned</strong> (DM sent with appeal link)<br>
+            2. A new log channel is automatically recreated<br>
+            3. All whitelisted owners and the bot get access to the new channel<br>
+            4. A full incident report is posted in the new channel</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">🪝 Webhook Deletion</div>
+            <div class="howbot-body">Any new webhook created in the server is automatically deleted unless it was created by the server owner or a whitelisted owner.<br>
+            Webhooks are a common attack vector for raiding — this removes them before they can be used.</div>
+          </div>
+
+          <div class="howbot-item">
+            <div class="howbot-title">📝 Message Deletion Tracking (Snipe)</div>
+            <div class="howbot-body">Every deleted message in the server is recorded internally — including the content, the author, and who deleted it (if it was deleted by someone else, that is logged too).<br>
+            Staff can use <code>/snipe @user</code> to view the last 10 deleted messages from any user.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>⚡ Manual Commands — Moderation</h3>
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">/ban &lt;user&gt; [reason]</div>
+            <div class="howbot-body">Bans a user from the server. Requires Ban Members permission.<br>
+            • Checks the executor has permission and the target is not a higher role<br>
+            • DMs the banned user their ban reason and the appeal server link<br>
+            • Logs the action to the server log channel</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/kick &lt;user&gt; [reason]</div>
+            <div class="howbot-body">Kicks a user. Requires Kick Members permission.<br>
+            • Role hierarchy is checked before kicking<br>
+            • DMs the user with the reason<br>
+            • Logged to the log channel</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/timeout &lt;user&gt; &lt;minutes&gt; [reason]</div>
+            <div class="howbot-body">Times out a user for the specified number of minutes (max ~28 days).<br>
+            • Requires Moderate Members permission<br>
+            • DMs the user with the duration and reason<br>
+            • Logged</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/warn &lt;user&gt; [reason]</div>
+            <div class="howbot-body">Issues a formal warning. Warns are tracked permanently per guild.<br>
+            • Warn 1 → 24-hour timeout<br>
+            • Warn 2 → 48-hour timeout<br>
+            • Warn 3+ → ban (with appeal DM)<br>
+            • Each warn is logged and viewable via /warns</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/warns &lt;user&gt;</div>
+            <div class="howbot-body">Lists all recorded warnings for a user, showing the reason and timestamp of each one.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/clearwarns &lt;user&gt;</div>
+            <div class="howbot-body">Clears all warnings for a user. Requires ban permissions. Logged.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/purge &lt;amount&gt; [@user]</div>
+            <div class="howbot-body">Bulk-deletes up to the specified number of recent messages in the channel.<br>
+            If a user is specified, only their messages are deleted. Requires Manage Messages permission.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/lockdown &lt;lock|unlock&gt; [reason]</div>
+            <div class="howbot-body">Locks the current channel (removes Send Messages from @everyone) or unlocks it. Logged with reason.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/snipe &lt;user&gt;</div>
+            <div class="howbot-body">Shows the last 10 deleted messages from the specified user in the server. Includes content, channel, and timestamp.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🔧 Manual Commands — Utility &amp; Config</h3>
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">/userinfo [@user]</div>
+            <div class="howbot-body">Shows detailed info about a user: join date, account age, roles, and total warn count. Defaults to the command user if no target given.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/serverinfo</div>
+            <div class="howbot-body">Shows server statistics: member count, boost level, channel count, creation date, and server owner.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/roblox</div>
+            <div class="howbot-body">Fetches live Roblox game stats for <em>Survive Events for Brainrots</em>: current players online, total visits, favorites, like/dislike counts — with direct buttons to the game page.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/prefix &lt;prefix&gt;</div>
+            <div class="howbot-body">Sets a custom text command prefix for the server (e.g. <code>!</code>). After setting, all slash commands are also usable as text commands (e.g. <code>!ban @user reason</code>). Server owner only.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/whitelist &lt;botId&gt;</div>
+            <div class="howbot-body">Adds a bot ID to the whitelist so it won't be auto-kicked when joining. Server owner only.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/whitelistowner &lt;user&gt;</div>
+            <div class="howbot-body">Adds a user to the whitelist. Whitelisted users bypass all auto-protections (spam, link filter, profanity, anti-nuke checks). Server owner only.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/unwhitelistowner &lt;user&gt;</div>
+            <div class="howbot-body">Removes a user from the whitelist. They are now subject to all auto-protections again.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">/usercreate &lt;user&gt; &lt;username&gt; &lt;password&gt;</div>
+            <div class="howbot-body">Creates a web panel account for a Discord user. Server owner only.<br>
+            • Hashes the password and stores the account<br>
+            • Generates a QR login token and QR code image<br>
+            • DMs the user their credentials, QR image, and panel link</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📩 Ban Appeal System</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Runs entirely via Discord DMs — users interact with the bot directly in their private messages.</p>
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">How Appeals Start</div>
+            <div class="howbot-body">The appeal system posts a message in the appeal server with two buttons: <strong>Server Ban Appeal</strong> and <strong>In-Game Ban Appeal</strong>.<br>
+            When a user clicks, the bot checks if they are actually banned (for server appeals), then DMs them to begin the questionnaire.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Server Ban Appeal (12 Questions)</div>
+            <div class="howbot-body">The bot asks 12 questions one at a time via DM:<br>
+            username confirmation → ban date → known reason → fairness explanation → rule compliance → prior warns → conflicts → other parties involved → evidence → their perspective → what they'd do differently → anything else<br><br>
+            The bot fetches the actual ban reason from the main server and includes it in the appeal embed.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">In-Game Ban Appeal</div>
+            <div class="howbot-body">Starts with asking why they were banned. If the answer mentions anti-cheat keywords (EAC, VAC, BattlEye, etc.) → the bot flags it as an anti-cheat ban, does not accept normal appeals, and asks for a video recording instead.<br>
+            For normal game bans → asks for a screenshot of the ban message, then 6 more questions.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">AI Detection</div>
+            <div class="howbot-body">After the user completes all questions, their combined answers are analyzed by the built-in AI detector before submission.<br><br>
+            The detector checks for:<br>
+            • Known AI phrases: <em>"I sincerely apologize"</em>, <em>"Going forward"</em>, <em>"I take full responsibility"</em>, <em>"Furthermore"</em>, etc.<br>
+            • Overly formal transition words (Moreover, Consequently, In conclusion…)<br>
+            • Uniform sentence lengths (AI writes consistently; humans vary)<br>
+            • Multiple structured paragraphs<br>
+            • Overly formal vocabulary (sincerely, humbly, wholeheartedly, utmost…)<br>
+            • Human markers that reduce the score: casual slang, lowercase i, short answers, contractions<br><br>
+            If AI is detected → appeal rejected, user gets a DM explaining why and can try again. If it passes → appeal is submitted to the appeal channel with an AI scan result field.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Staff Review</div>
+            <div class="howbot-body">Approved appeals are posted in the appeal channel with Approve/Deny buttons visible to staff with the Approver role.<br>
+            • Clicking either button opens a modal asking for a written reason<br>
+            • The reason is sent to the user via DM only (not posted publicly)<br>
+            • On approval of a server ban → user is automatically unbanned + sent a server invite<br>
+            • On approval of a game ban → user is told to wait 1–2 days<br>
+            • All appeal outcomes are stored and visible in the web panel Appeals section</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🌐 Web Panel</h3>
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">Login</div>
+            <div class="howbot-body">Two login methods:<br>
+            • <strong>Password</strong> — enter username and password (bcrypt-hashed, never stored in plain inside the session)<br>
+            • <strong>QR Token</strong> — paste the token from your bot DM to log in without a username or password<br><br>
+            Sessions last 7 days via a secure HTTP-only JWT cookie.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Access Levels</div>
+            <div class="howbot-body">The panel checks your Discord roles live on every page load:
+            <table style="margin-top:8px;font-size:12px">
+              <tr><th style="padding:4px 8px">Level</th><th style="padding:4px 8px">How it's assigned</th><th style="padding:4px 8px">Panel access</th></tr>
+              <tr><td style="padding:4px 8px"><strong>Guest</strong></td><td style="padding:4px 8px">No matching role</td><td style="padding:4px 8px">Overview, Commands, Settings</td></tr>
+              <tr><td style="padding:4px 8px"><strong>Mod</strong></td><td style="padding:4px 8px">Kick Members or Moderate Members perm</td><td style="padding:4px 8px">+ Logs, Moderation (timeout/warn)</td></tr>
+              <tr><td style="padding:4px 8px"><strong>Admin</strong></td><td style="padding:4px 8px">Ban Members or Manage Guild perm</td><td style="padding:4px 8px">+ Appeals, Kick, Ban</td></tr>
+              <tr><td style="padding:4px 8px"><strong>Administrator</strong></td><td style="padding:4px 8px">Administrator perm</td><td style="padding:4px 8px">+ Shift User</td></tr>
+              <tr><td style="padding:4px 8px"><strong>Whitelist</strong></td><td style="padding:4px 8px">Added via /whitelistowner</td><td style="padding:4px 8px">+ Accounts</td></tr>
+              <tr><td style="padding:4px 8px"><strong>Owner</strong></td><td style="padding:4px 8px">Server owner</td><td style="padding:4px 8px">Everything</td></tr>
+            </table></div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Moderation (Web)</div>
+            <div class="howbot-body">Staff can take moderation actions on Discord users by entering their User ID:<br>
+            • <strong>Timeout</strong> — set duration in minutes (up to 28 days)<br>
+            • <strong>Kick</strong> — removes from server, no ban<br>
+            • <strong>Ban</strong> — permanent ban, DM sent to user with appeal link, appeal entry created in the system<br>
+            • <strong>Warn</strong> — adds a warn entry, DMs the user<br>
+            All web actions are logged to the server log channel with the staff member's username.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Logs</div>
+            <div class="howbot-body">Displays the last 200 moderation actions recorded by the bot — including automatic protections (spam timeouts, link deletions, anti-nuke actions) and manual commands. Each log shows the action title, description, and timestamp.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Appeals (Web)</div>
+            <div class="howbot-body">Shows all submitted appeals with filtering by status (pending / approved / denied). Displays the user, appeal type (server/game), status, submission date, and who reviewed it. Appeals are also handled via Discord buttons in the appeal channel — the web panel is read-only for this.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Settings</div>
+            <div class="howbot-body">• <strong>Theme</strong> — choose panel color: Default (purple), Red, Blue, Green, Light<br>
+            • <strong>Language</strong> — save your preferred language preference (20+ options)<br>
+            • <strong>Change Password</strong> — enter new password → bot DMs you a confirm button → click confirm in Discord → password updates instantly<br>
+            • <strong>Account Info</strong> — shows your username, Discord ID, and current access level</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Shift User</div>
+            <div class="howbot-body">Transfers your panel account to a different Discord user (Administrator+ only):<br>
+            • If the target has <strong>no existing account</strong> → bot DMs them with Accept/Decline buttons. On accept, an account is created with their Discord username and a random password. QR code is included in the DM.<br>
+            • If the target <strong>already has an account</strong> → this account is immediately reassigned to them. They are DM'd about the transfer.<br>
+            • Server owners and whitelisted users are always notified of any shift.</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Accounts (Owner / Whitelist only)</div>
+            <div class="howbot-body">Lists every panel account with:<br>
+            • Username<br>
+            • Linked Discord ID<br>
+            • The password (stored at creation time)<br>
+            • Creation date<br>
+            Accounts can be deleted from this page. You cannot delete your own account.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📋 Logging</h3>
+        <div class="howbot-section">
+          <div class="howbot-item">
+            <div class="howbot-title">What Gets Logged</div>
+            <div class="howbot-body">Every significant action is logged to the designated server log channel and stored in the bot's data file for the web panel:<br>
+            • All moderation actions (ban, kick, timeout, warn, purge, lockdown)<br>
+            • Anti-spam triggers<br>
+            • Mass mention warnings and kicks<br>
+            • Link and profanity deletions<br>
+            • Anti-nuke events (role stripped, channel deletion spree)<br>
+            • Dangerous role creation<br>
+            • Unauthorized bot kicks<br>
+            • Webhook deletions<br>
+            • Log channel recreation events<br>
+            • Web panel moderation actions (with staff username)</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Log Channel Protection</div>
+            <div class="howbot-body">The log channel is set to a specific channel ID. If that channel is deleted:<br>
+            1. The deleter is immediately banned<br>
+            2. A new log channel is created with restricted permissions (only Administrators and the bot can view it)<br>
+            3. A full incident report is posted — who deleted it, old channel ID, new channel ID<br>
+            4. The new channel ID is saved so logging continues seamlessly</div>
+          </div>
+          <div class="howbot-item">
+            <div class="howbot-title">Data Storage</div>
+            <div class="howbot-body">All persistent data is stored in <code>data/botdata.json</code>:<br>
+            • Warns per guild per user<br>
+            • Whitelisted bots and owners<br>
+            • Guild prefixes<br>
+            • Deleted message history (for /snipe)<br>
+            • Channel deletion trackers (for anti-nuke)<br>
+            • Stripped role backups<br>
+            • All appeals (last 500)<br>
+            • Moderation logs (last 200)<br>
+            • Web panel user accounts (with hashed passwords and QR tokens)<br>
+            • Pending password changes and shift confirmations</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="readAllCard" style="border:2px solid rgba(114,137,218,.35);background:rgba(114,137,218,.06)">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <input type="checkbox" id="readAllCheck" onchange="onReadAllChange(this)"
+            style="width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--accent);cursor:pointer">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">I have read all the guides above</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5">By checking this box you confirm you have read and understood how the SEB Security bot works, including auto-protections, moderation commands, the appeal system, and the web panel.</div>
+            <div id="readAllDone" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:var(--green)">✅ Acknowledged — you're all set!</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<script>
+let me = null;
+let currentColor = 'default';
+let currentModAction = 'timeout';
+
+function getToken() { return sessionStorage.getItem('auth_token') || ''; }
+
+function authFetch(url, opts = {}) {
+  const token = getToken();
+  const headers = { ...(opts.headers || {}) };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(url, { ...opts, headers });
+}
+
+async function init() {
+  const token = getToken();
+  if (!token) { window.location.href = '/login'; return; }
+  let r;
+  try { r = await authFetch('/api/me'); }
+  catch { window.location.href = '/login'; return; }
+  if (!r.ok) { sessionStorage.removeItem('auth_token'); window.location.href = '/login'; return; }
+
+  try {
+    me = await r.json();
+    applyUserInfo();
+    await loadCommands();
+    checkBotStatus();
+    applyColor(me.settings?.color || 'default');
+    loadSettings();
+
+    if (me.hasLogAccess) { show('nav-logs'); loadLogs(); }
+    if (me.hasAppealAccess) { show('nav-appeals'); loadAppeals('all'); }
+    if (me.hasShiftAccess) show('nav-shift');
+    if (me.hasModerationAccess) { show('nav-moderation'); setupModTabs(); }
+    if (me.hasAccountsAccess) { show('nav-accounts'); loadAccounts(); }
+
+    if (!me.hasLogAccess && !me.hasAppealAccess) {
+      if (!me.hasModerationAccess) showPage('commands');
+    }
+  } catch (err) { console.error('Panel init error:', err); }
+}
+
+function show(id) { document.getElementById(id).style.display = 'flex'; }
+
+function applyUserInfo() {
+  document.getElementById('userName').textContent = me.username;
+  document.getElementById('userAvatar').textContent = me.username[0].toUpperCase();
+  document.getElementById('settingsUsername').textContent = me.username;
+  document.getElementById('settingsLevel').textContent = me.accessLevel;
+  document.getElementById('settingsDiscord').textContent = me.discordId;
+}
+
+function setupModTabs() {
+  if (!me.canKick) document.getElementById('modtab-kick').classList.add('disabled');
+  else document.getElementById('modtab-kick').classList.remove('disabled');
+  if (!me.canBan) document.getElementById('modtab-ban').classList.add('disabled');
+  else document.getElementById('modtab-ban').classList.remove('disabled');
+}
+
+function setModAction(action) {
+  if (!me) return;
+  if (action === 'kick' && !me.canKick) return;
+  if (action === 'ban' && !me.canBan) return;
+  currentModAction = action;
+  document.querySelectorAll('.action-tab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('modtab-' + action);
+  if (tab && !tab.classList.contains('disabled')) tab.classList.add('active');
+  document.getElementById('modDurationGroup').style.display = action === 'timeout' ? 'block' : 'none';
+  const btn = document.getElementById('modSubmitBtn');
+  btn.className = 'btn ' + (action === 'ban' ? 'btn-danger' : action === 'warn' ? 'btn-warn' : action === 'kick' ? 'btn-danger' : 'btn-primary');
+  btn.textContent = { timeout: '⏱️ Apply Timeout', kick: '👢 Kick User', ban: '🔨 Ban User', warn: '⚠️ Warn User' }[action] || 'Execute';
+}
+
+async function submitModAction() {
+  const userId = document.getElementById('modUserId').value.trim();
+  const reason = document.getElementById('modReason').value.trim();
+  if (!userId) { showModAlert('error', 'Enter a Discord User ID.'); return; }
+
+  const body = { userId, reason };
+  if (currentModAction === 'timeout') {
+    const mins = parseInt(document.getElementById('modDuration').value);
+    if (!mins || mins < 1) { showModAlert('error', 'Enter a valid duration in minutes.'); return; }
+    body.minutes = mins;
+  }
+
+  const btn = document.getElementById('modSubmitBtn');
+  btn.disabled = true;
+  const origText = btn.textContent;
+
+  try {
+    const r = await authFetch('/api/moderation/' + currentModAction, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { showModAlert('error', d.error || 'Action failed.'); }
+    else {
+      const label = { timeout: `User timed out for ${body.minutes} minutes.`, kick: 'User kicked.', ban: 'User banned. Appeal DM sent.', warn: 'User warned via DM.' }[currentModAction];
+      showModAlert('success', '✅ ' + label);
+      document.getElementById('modUserId').value = '';
+      document.getElementById('modReason').value = '';
+      if (currentModAction === 'timeout') document.getElementById('modDuration').value = '';
+    }
+  } catch { showModAlert('error', 'Could not connect.'); }
+  btn.disabled = false; btn.textContent = origText;
+}
+
+function showModAlert(type, msg) {
+  const el = document.getElementById('modAlert');
+  el.className = 'alert alert-' + type;
+  el.textContent = msg;
+  setTimeout(() => { el.className = 'alert alert-hidden'; }, 4000);
+}
+
+async function checkBotStatus() {
+  try {
+    const r = await fetch('/health');
+    const d = await r.json();
+    const online = d.bot === 'online';
+    document.getElementById('botDot').className = 'dot ' + (online ? 'online' : 'offline');
+    document.getElementById('botStatusText').textContent = online ? 'Online' : 'Starting...';
+    document.getElementById('statDot').className = 'dot ' + (online ? 'online' : 'offline');
+    document.getElementById('statBotText').textContent = online ? 'Online' : 'Starting...';
+  } catch {}
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+}
+
+async function loadCommands() {
+  const r = await authFetch('/api/commands');
+  const cmds = await r.json();
+  document.getElementById('commandsGrid').innerHTML = cmds.map(c =>
+    `<div class="cmd-card"><div class="cmd-name">${c.name}</div><div class="cmd-desc">${esc(c.description)}</div><div class="cmd-cat">${esc(c.category)}</div></div>`
+  ).join('');
+}
+
+async function loadLogs() {
+  const r = await authFetch('/api/logs');
+  if (!r.ok) return;
+  const logs = await r.json();
+  document.getElementById('statLogs').textContent = logs.length;
+  const c = document.getElementById('logsContainer');
+  if (!logs.length) { c.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No logs yet</div>'; return; }
+  c.innerHTML = logs.map(l => `
+    <div class="log-item">
+      <div class="log-title">${esc(l.title)}</div>
+      <div class="log-desc">${esc(l.description?.substring(0,120) || '')}</div>
+      <div class="log-time">${new Date(l.at).toLocaleString()}</div>
+    </div>`).join('');
+}
+
+async function loadAppeals(status) {
+  const url = '/api/appeals' + (status && status !== 'all' ? '?status=' + status : '');
+  const r = await authFetch(url);
+  if (!r.ok) return;
+  const appeals = await r.json();
+  document.getElementById('statAppeals').textContent = appeals.length;
+  document.getElementById('statPending').textContent = appeals.filter(a => a.status === 'pending').length;
+  const tbody = document.getElementById('appealsBody');
+  if (!appeals.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No appeals found</td></tr>'; return; }
+  tbody.innerHTML = appeals.map(a => `
+    <tr>
+      <td>${esc(a.userTag || a.userId)}</td>
+      <td><span class="pill ${a.type}">${a.type === 'server' ? '🔨 Server' : '🎮 Game'}</span></td>
+      <td><span class="status ${a.status}">${a.status}</span></td>
+      <td>${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : '—'}</td>
+      <td>${a.reviewedBy ? esc(a.reviewedBy) : '—'}</td>
+    </tr>`).join('');
+}
+
+async function loadSettings() {
+  const r = await authFetch('/api/settings');
+  const s = await r.json();
+  currentColor = s.color || 'default';
+  document.querySelectorAll('.swatch').forEach(sw => {
+    sw.classList.toggle('active', sw.classList.contains(currentColor));
+  });
+  const langSel = document.getElementById('languageSelect');
+  if (langSel && s.language) langSel.value = s.language;
+}
+
+function setSwatch(color, el) {
+  document.querySelectorAll('.swatch').forEach(sw => sw.classList.remove('active'));
+  el.classList.add('active');
+  applyColor(color);
+  saveSettings(color, document.getElementById('languageSelect')?.value || 'en');
+}
+
+async function saveLanguage() {
+  const lang = document.getElementById('languageSelect').value;
+  await saveSettings(currentColor, lang);
+}
+
+function applyColor(color) {
+  document.documentElement.dataset.theme = color === 'default' ? '' : color;
+  currentColor = color;
+}
+
+async function saveSettings(color, language) {
+  const r = await authFetch('/api/settings', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ color, language })
+  });
+  if (r.ok) {
+    const el = document.getElementById('settingsAlert');
+    el.className = 'alert alert-success'; el.textContent = 'Settings saved.';
+    setTimeout(() => { el.className = 'alert alert-hidden'; }, 2000);
+  }
+}
+
+async function requestPasswordChange() {
+  const newPw = document.getElementById('newPassword').value;
+  const confirmPw = document.getElementById('confirmPassword').value;
+  const el = document.getElementById('pwAlert');
+
+  if (!newPw || newPw.length < 6) { el.className = 'alert alert-error'; el.textContent = 'Password must be at least 6 characters.'; return; }
+  if (newPw !== confirmPw) { el.className = 'alert alert-error'; el.textContent = 'Passwords do not match.'; return; }
+
+  const r = await authFetch('/api/password/request-change', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ newPassword: newPw })
+  });
+  const d = await r.json();
+  if (r.ok) {
+    el.className = 'alert alert-success';
+    el.textContent = '✅ ' + (d.message || 'Check your Discord DMs to confirm.');
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  } else {
+    el.className = 'alert alert-error';
+    el.textContent = d.error || 'Failed to request change.';
+  }
+}
+
+async function loadAccounts() {
+  const r = await authFetch('/api/accounts');
+  if (!r.ok) return;
+  const accounts = await r.json();
+  const container = document.getElementById('accountsList');
+  if (!accounts.length) { container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>No accounts found</div>'; return; }
+  container.innerHTML = accounts.map(a => `
+    <div class="account-row" id="acc-${esc(a.username)}">
+      <div class="account-info">
+        <div class="account-name">${esc(a.username)}</div>
+        <div class="account-meta">Discord: <code style="font-size:11px">${esc(a.discordId)}</code></div>
+        <div class="account-meta">Password: <span class="account-pass">${a.plainPassword ? esc(a.plainPassword) : '(hidden)'}</span></div>
+        ${a.createdAt ? `<div class="account-meta">Created: ${new Date(a.createdAt).toLocaleDateString()}</div>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteAccount('${esc(a.username)}')">🗑️ Delete</button>
+    </div>`).join('');
+}
+
+async function deleteAccount(username) {
+  if (!confirm(`Delete account "${username}"? This cannot be undone.`)) return;
+  const r = await authFetch('/api/accounts/' + encodeURIComponent(username), { method: 'DELETE' });
+  const d = await r.json();
+  const el = document.getElementById('accountsAlert');
+  if (r.ok) {
+    el.className = 'alert alert-success'; el.textContent = `Account "${username}" deleted.`;
+    const row = document.getElementById('acc-' + username);
+    if (row) row.remove();
+    setTimeout(() => { el.className = 'alert alert-hidden'; }, 2000);
+  } else {
+    el.className = 'alert alert-error'; el.textContent = d.error || 'Delete failed.';
+  }
+}
+
+async function doShift() {
+  const newId = document.getElementById('shiftDiscordId').value.trim();
+  if (!newId) return;
+  if (!confirm(`Shift your panel account to Discord user ID: ${newId}?\n\nThey will receive a DM. Server owners will be notified.`)) return;
+  const r = await authFetch('/api/shift', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ newDiscordId: newId })
+  });
+  const d = await r.json();
+  const el = document.getElementById('shiftAlert');
+  if (r.ok) {
+    if (d.pendingConfirmation) {
+      el.className = 'alert alert-info';
+      el.textContent = `✅ Invitation sent to ${d.targetTag || newId}. They must confirm via DM to get their account.`;
+    } else {
+      el.className = 'alert alert-success';
+      el.textContent = `Account shifted to ${d.targetTag || newId}. Owners have been notified.`;
+    }
+  } else {
+    el.className = 'alert alert-error'; el.textContent = d.error || 'Shift failed.';
+  }
+}
+
+async function logout() {
+  sessionStorage.removeItem('auth_token');
+  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  window.location.href = '/login';
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+init();
+setModAction('timeout');
+</script>
+</body>
+</html>

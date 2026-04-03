@@ -1,0 +1,10 @@
+previewPath = "/"
+title = "SEB Security Panel"
+
+[[services]]
+localPort = 3000
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/discord-bot run start"

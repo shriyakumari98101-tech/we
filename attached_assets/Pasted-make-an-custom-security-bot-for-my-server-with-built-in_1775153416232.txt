@@ -1,0 +1,137 @@
+make an custom security bot for my server with built in Security features and etc
+
+
+
+/ban player reason - Checks if the user any role have ban perms, if yes then n it bans user
+
+/kick player vreason- same checks for kick perms
+
+/timeout player  reason - checks for timeout perms
+
+
+
+if any bot is added, it's kicked instantly and user who added the bot
+
+to whitelist bot
+
+
+
+/whitellist botname  - can be done by server owner only
+
+
+
+if an user does mass mention more than 2 times - kick
+
+
+
+same for spam, same for webhook new one created instaant delete
+
+
+
+donest harm any alrdy prebuilt bots etc or webhook
+
+
+
+an user manually deleted 4 channels - all roles taken ( all roles removed ) until server owner manually gives it back
+
+
+
+
+
+/whitelistowner username - can be done by server owner ( user who are whitelist can do anything and bot wont harm )
+
+/unwhitelistownr username
+
+
+
+ingores mass joins
+
+
+
+before baning anyone bot sends this messages
+
+
+
+You have been banned form server name
+
+You can appeal here: https://discord.gg/FjGk7YbmAQ
+
+
+
+for kick  message
+
+
+
+You have been kicked form server na,e 
+
+
+
+add /warn player
+
+
+
+Warn 1 -> 24 hour timeout
+
+Warn 2 -> 48 hour timeout
+
+Warn 3 --> BAN ( appeal sends )
+
+
+
+and bot also says in next warn u will get this punshiment
+
+
+
+add prefix 
+
+/prefix  ___
+
+
+
+in __ u enter anything 
+
+
+
+and after that u say that word with command for ex !ban @user bullying
+
+
+
+etc
+
+
+
+https://discord.com/channels/1480339629465927680/1484747550505308302 - all logs sent here by bot
+
+
+
+including which messages was deleted by who and how 
+
+
+
+/snipe user  - shows last 10 messages deleted by an user
+
+
+
+add few more anti-nuke or raid module u will like 
+
+
+
+also if someone sends any link it will get deleted expect for gifs 
+
+ingore these roleid they post  links: 1489027942137860116 , 1480340173442125844 , 1488894822327779348 , 1489206286871433257
+
+strictly block discord invite ones
+
+
+
+IMPORTANT - BOT CHECKS THE ROLE OF PERMS THE PERSON THEY HAVE  FOR EX SOMEONE HAVE AN ROLE WITH ADMIN PERM THEY WILL CONSIDER AN ADMIN
+
+IF SOMEONE MAKES AN DANGEROUS ROLE LIKE ADMINSTAOR PERMS DELETE THAT ROLE UNLESS WHITELISTED BY SERVER OWNER OR ITS BY SERVEROWNER HIMSELF
+
+
+
+Node.js ( must stay good with replit, github , render, railway )
+
+
+
+i will post important things like token in secert instead of in script 

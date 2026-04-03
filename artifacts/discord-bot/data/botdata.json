@@ -1,0 +1,239 @@
+{
+  "whitelistedBots": [
+    "426537812993638400"
+  ],
+  "whitelistedOwners": [
+    "846929449106014239",
+    "763459502246068295"
+  ],
+  "warns": {
+    "1480339629465927680": {
+      "1162404296097275904": []
+    }
+  },
+  "prefixes": {
+    "1480339629465927680": ".z"
+  },
+  "deletedMessages": {
+    "1162404296097275904": [
+      {
+        "content": "https://tenor.com/view/maintaining-the-agenda-agenda-is-priority-priority-agenda-maintain-the-agenda-the-agenda-gif-3278548794073012331",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244862337,
+        "attachments": []
+      },
+      {
+        "content": "https://tenor.com/view/cheering-baby-yeah-woo-hoo-lets-go-excited-kid-gif-8986898329054329350",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244860356,
+        "attachments": []
+      },
+      {
+        "content": "https://tenor.com/view/he-made-a-statement-statement-dog-clowned-trash-opinion-your-opinion-gif-15033044919438935088",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244858668,
+        "attachments": []
+      },
+      {
+        "content": "https://klipy.com/gifs/aryan-studylions",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244839682,
+        "attachments": []
+      },
+      {
+        "content": "https://klipy.com/gifs/aryan-studylions",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244805058,
+        "attachments": []
+      },
+      {
+        "content": "https://cdn.discordapp.com/attachments/1462044495305511019/1487847437426102444/image0.gif",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775244797535,
+        "attachments": []
+      },
+      {
+        "content": "wtf",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207517521,
+        "attachments": []
+      },
+      {
+        "content": "wtf",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207505099,
+        "attachments": []
+      },
+      {
+        "content": "https://discord.com/channels/1480339629465927680/1488618228401045667",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207494767,
+        "attachments": []
+      },
+      {
+        "content": "https://discord.com/channels/1480339629465927680/1488618228401045667",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207476862,
+        "attachments": []
+      }
+    ],
+    "1224778290410295497": [
+      {
+        "content": "n*i/g(e>r",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207322844,
+        "attachments": []
+      },
+      {
+        "content": "nigger",
+        "channelId": "1488582835534303433",
+        "deletedAt": 1775207269255,
+        "attachments": []
+      }
+    ]
+  },
+  "channelDeletions": {},
+  "strippedRoles": {},
+  "logChannelId": "1484747550505308302",
+  "appealMessageId": "1489718884092084445",
+  "_profanityStrikes": {
+    "1480339629465927680": {
+      "1224778290410295497": 2,
+      "1162404296097275904": 2
+    }
+  },
+  "users": {
+    "testuser": {
+      "username": "testuser",
+      "discordId": "123456789012345678",
+      "passwordHash": "$2b$10$96N0uVYxOoHmsV9FjEvr3.bddURpvH/v6.xBbJ6FT9pir6hRTuWJm",
+      "plainPassword": "mypassword",
+      "qrToken": "SEBE7xeCDZtzwqf2eSb6rYt",
+      "createdAt": 1775251802749,
+      "createdBy": "setup",
+      "settings": {
+        "color": "default",
+        "language": "en"
+      },
+      "shiftedTo": null
+    },
+    "zenith": {
+      "username": "zenith",
+      "discordId": "1162404296097275904",
+      "passwordHash": "$2b$10$KavRmEmS1YFWJfFJKJpf9uIkErusSilrJj6UVthg3e22/90Sm69MW",
+      "plainPassword": "Zenithisanguy",
+      "qrToken": "SEBhL6AF62R7yYDAVPA4kUh",
+      "createdAt": 1775251850477,
+      "createdBy": "1162404296097275904",
+      "settings": {
+        "color": "default",
+        "language": "en"
+      },
+      "shiftedTo": null
+    }
+  },
+  "appeals": [
+    {
+      "id": "1162404296097275904_1775225991648",
+      "userId": "1162404296097275904",
+      "userTag": "itszenith_1",
+      "type": "game",
+      "banReason": null,
+      "answers": [
+        "anti cheat",
+        "No recording provided."
+      ],
+      "questions": [
+        "Why were you banned?",
+        "Recording/video provided:"
+      ],
+      "status": "denied",
+      "reason": "We do not take Anti cheat appeal, at least an video  is required.",
+      "reviewedBy": "1162404296097275904",
+      "messageId": "1489630519275683880",
+      "submittedAt": 1775225992143,
+      "reviewedAt": 1775226031499
+    }
+  ],
+  "recentLogs": [
+    {
+      "id": "1775244862954-xgaa6",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244862954
+    },
+    {
+      "id": "1775244860933-h5scv",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244860933
+    },
+    {
+      "id": "1775244859298-p0jjs",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244859299
+    },
+    {
+      "id": "1775244840325-yip3e",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244840325
+    },
+    {
+      "id": "1775244839952-hhgnu",
+      "title": "Link Deleted",
+      "description": "<@1162404296097275904> tried to send a non-allowed link.",
+      "color": 16746496,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244839952
+    },
+    {
+      "id": "1775244805787-68slw",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244805787
+    },
+    {
+      "id": "1775244805498-klepb",
+      "title": "Link Deleted",
+      "description": "<@1162404296097275904> tried to send a non-allowed link.",
+      "color": 16746496,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244805499
+    },
+    {
+      "id": "1775244798290-5p5ui",
+      "title": "Message Deleted",
+      "description": "Message by <@1162404296097275904> in <#1488582835534303433> was deleted by <@1162404296097275904> (self-deleted)",
+      "color": 16763904,
+      "guildId": "1480339629465927680",
+      "guildName": "Survive Events for Brainrots | Offical",
+      "at": 1775244798290
+    }
+  ],
+  "_passwordCodes": {
+    "1266466014519099412": {
+      "code": "391202",
+      "username": "jjk",
+      "expiresAt": 1775250089722
+    }
+  }
+}

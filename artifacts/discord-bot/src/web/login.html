@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEB Security — Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1e2124;color:#dcddde;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#2f3136;border-radius:10px;padding:40px 36px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+.logo-icon{width:44px;height:44px;background:#7289da;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.logo-text h1{font-size:18px;font-weight:700;color:#fff}
+.logo-text p{font-size:12px;color:#72767d}
+.tabs{display:flex;gap:4px;background:#202225;border-radius:6px;padding:3px;margin-bottom:24px}
+.tab{flex:1;padding:8px;text-align:center;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;color:#72767d;transition:all .15s}
+.tab.active{background:#7289da;color:#fff}
+.pane{display:none}
+.pane.active{display:block}
+label{display:block;font-size:12px;font-weight:600;color:#b9bbbe;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input[type="text"],input[type="password"]{width:100%;background:#40444b;border:1px solid #202225;border-radius:4px;color:#dcddde;padding:10px 12px;font-size:14px;outline:none;transition:border-color .15s}
+input:focus{border-color:#7289da}
+.field{margin-bottom:20px}
+button{width:100%;background:#7289da;color:#fff;border:none;border-radius:4px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px}
+button:hover{background:#677bc4}
+button:disabled{background:#4e5d94;cursor:not-allowed}
+.error{color:#f04747;font-size:13px;margin-top:12px;text-align:center;display:none}
+.divider{border-top:1px solid #40444b;margin:20px 0}
+.footer{font-size:12px;color:#72767d;text-align:center}
+.qr-hint{font-size:13px;color:#72767d;margin-bottom:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">
+      <h1>SEB Security</h1>
+      <p>Control Panel</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('password')">Password</div>
+    <div class="tab" onclick="switchTab('qr')">QR Token</div>
+  </div>
+
+  <div class="pane active" id="pane-password">
+    <div class="field">
+      <label>Username</label>
+      <input id="username" type="text" placeholder="your_username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button id="loginBtn" onclick="login()">Log In</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <div class="pane" id="pane-qr">
+    <p class="qr-hint">Paste the QR login token from your account creation page or from the bot DM.</p>
+    <div class="field">
+      <label>QR Login Token</label>
+      <input id="qrToken" type="text" placeholder="SEBxxxxxxxxxxxxxxxx">
+    </div>
+    <button id="qrBtn" onclick="qrLogin()">Login with Token</button>
+    <div id="qrError" class="error"></div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="footer">Contact a server administrator to get access.<br><br><a href="/changepassword" style="color:#7289da;text-decoration:none">🔑 Change / Reset your password</a></div>
+</div>
+
+<script>
+(async () => {
+  const token = sessionStorage.getItem('auth_token');
+  if (token) {
+    try {
+      const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (r.ok) { window.location.replace('/panel'); return; }
+    } catch {}
+    sessionStorage.removeItem('auth_token');
+  }
+  document.getElementById('username').focus();
+})();
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['password','qr'][i] === name);
+  });
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  if (name === 'password') document.getElementById('username').focus();
+  else document.getElementById('qrToken').focus();
+}
+
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('username').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+document.getElementById('qrToken').addEventListener('keydown', e => { if (e.key === 'Enter') qrLogin(); });
+
+async function login() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('error');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!username || !password) { showError('error', 'Enter your username and password.'); return; }
+  btn.disabled = true; btn.textContent = 'Logging in...'; err.style.display = 'none';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('error', data.error || 'Login failed.'); btn.disabled = false; btn.textContent = 'Log In'; return; }
+    sessionStorage.setItem('auth_token', data.token);
+    window.location.replace('/panel');
+  } catch {
+    showError('error', 'Could not connect. Try again.');
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+}
+
+async function qrLogin() {
+  const btn = document.getElementById('qrBtn');
+  const token = document.getElementById('qrToken').value.trim();
+  if (!token) { showError('qrError', 'Enter your QR token.'); return; }
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  try {
+    const res = await fetch('/api/auth/qrlogin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('qrError', data.error || 'Invalid token.'); btn.disabled = false; btn.textContent = 'Login with Token'; return; }
+    sessionStorage.setItem('auth_token', data.token);
+    window.location.replace('/panel');
+  } catch {
+    showError('qrError', 'Could not connect. Try again.');
+    btn.disabled = false; btn.textContent = 'Login with Token';
+  }
+}
+
+function showError(id, msg) {
+  const err = document.getElementById(id);
+  err.textContent = msg; err.style.display = 'block';
+}
+</script>
+</body>
+</html>
