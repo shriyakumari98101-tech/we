@@ -32,13 +32,18 @@ const JWT_SECRET = process.env.SESSION_SECRET || "seb_security_secret_fallback";
 async function getAccessLevel(discordId) {
   const client = getClient();
   const data = getData();
-  if (!client) return "guest";
+
+  if (data.whitelistedOwners?.includes(discordId)) return "whitelist";
+
+  if (!client) {
+    const isPanelUser = Object.values(data.users || {}).some((u) => u.discordId === discordId);
+    return isPanelUser ? "mod" : "guest";
+  }
 
   const mainGuild = client.guilds.cache.get(MAIN_GUILD_ID);
   const appealGuild = client.guilds.cache.get(APPEAL_GUILD_ID);
 
   if (mainGuild?.ownerId === discordId) return "owner";
-  if (data.whitelistedOwners?.includes(discordId)) return "whitelist";
 
   const member = await mainGuild?.members.fetch(discordId).catch(() => null);
 

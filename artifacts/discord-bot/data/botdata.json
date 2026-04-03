@@ -120,7 +120,7 @@
     "zenith": {
       "username": "zenith",
       "discordId": "1162404296097275904",
-      "passwordHash": "$2b$10$KavRmEmS1YFWJfFJKJpf9uIkErusSilrJj6UVthg3e22/90Sm69MW",
+      "passwordHash": "$2b$10$9sWUAZGgwxE91aneB/CIXevitvXo/dkBuavmWEqglh5LiDh9fhMeO",
       "plainPassword": "Zenithisanguy",
       "qrToken": "SEBhL6AF62R7yYDAVPA4kUh",
       "createdAt": 1775251850477,
@@ -234,6 +234,11 @@
       "code": "391202",
       "username": "jjk",
       "expiresAt": 1775250089722
+    },
+    "1162404296097275904": {
+      "code": "519755",
+      "username": "zenith",
+      "expiresAt": 1775256941809
     }
   }
 }
